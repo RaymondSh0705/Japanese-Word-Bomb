@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LobbyMeny</title>
+    <link rel="stylesheet" href="/static/lobbyMenu.css">
+</head>
+
+<body>
+    <div class="id">
+        <h1>JAPANESE WORD BOMB</h1>
+        <h2>日本語ワードボム</h2>
+    </div>
+    <hr>
+    <h2 class="mini-header" id="welcome">Create or Join a Lobby!</h2>
+    <div class="text">
+        <div>
+            <br />
+            <button class="create-lobby" onclick="createLobby()" id="create-lobby">Create Lobby</button>
+            <br /><br />
+        </div>
+        <div class="join-container">
+            <label class="join-label">
+                <span id="code-input" style="font-size: 1.25rem;">Join Code: </span><input type="text" />
+            </label>
+            <br>
+            <button class="join-lobby" id="join-lobby" onclick="joinLobby()">Join Lobby</button>
+            <p class="wrong-code" id="wrong-code" style="visibility:hidden">Invalid lobby code!</p>
+        </div>
+    </div>
+    <div class="extras">
+        <div id="lang-option" class="lang">
+            <label>
+                <span id="language-text" style="font-size: 1.25rem;">Language:</span>
+                <select id="language-switch" class="language-switch">
+                    <option value="en">English</option>
+                    <option value="jp">日本語</option>
+                </select>
+            </label>
+        </div>
+        <br>
+        <button id="instructions-btn">How to Play</button>
+    </div>
+    <div id="instructions-modal" class="modal" style="display:none">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="instructions-header" style="margin-bottom: -2%;">How to Play Word Bomb</h2>
+            <p id="instructions-body" style="font-size: 1.25rem;">
+                1. Wait for your turn.<br>
+                2. You will see a word pattern (e.g., "あい").<br>
+                3. Submit a word that matches the pattern before time runs out.<br>
+                4. If you fail, you lose a life.<br>
+                5. Last player standing wins!
+            </p>
+        </div>
+    </div>
+
+    <script src="/static/lobbyMenu.js"></script>
+</body>
+
+</html>

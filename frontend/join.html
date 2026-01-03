@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Word Bomb JP</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/join.css">
+</head>
+
+<body>
+    <div class="header">
+        <h1 id="header">Japanese Word Bomb Lobby</h1>
+        <h2 id="lobby-code">FURINA</h2>
+        <hr>
+    </div>
+    <div class="screen">
+        <div class="join">
+            <h2 id="join-game">Join game</h2>
+            <div class="join-row">
+                <input id="nameInput" placeholder="Name">
+                <button onclick="joinGame()" id="join">Join</button>
+            </div>
+            <button onclick="startGame()" id="start">Start</button>
+            <button onclick="leaveLobby()" id="leave">Return to Main Menu</button>
+
+            <div class="settings-anchor">
+                <button id="settings-btn">Settings ⚙️</button>
+                <div id="settings-modal" class="settings-modal" style="visibility: hidden;">
+                    <div class="modal-content">
+                        <span class="close-settings">&times;</span>
+                        <h2 id="settings-header">Game Settings</h2>
+                        <label>
+                            <span id="lives-label">Lives per player:</span>
+                            <input type="number" id="setting-lives" min="1" max="20" value="3">
+                        </label>
+                        <br>
+
+                        <label>
+                            <span id="diff-label">Difficulty:</span>
+                            <select id="setting-difficulty">
+                                <option value="easy" selected>Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </label>
+                        <br>
+
+                        <label>
+                            <span id="time-label">Turn Time (seconds):</span>
+                            <input type="number" id="setting-time" min="1" max="60" value="10">
+                        </label>
+                        <br>
+
+                        <label>
+                            <span id="prompt-label">Prompt Turns:</span>
+                            <input type="number" id="setting-turns" min="0" max="100" value="2">
+                        </label>
+                        <br>
+
+                        <button id="save-settings">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="player-list">
+            <div id="current-players">
+                <h2 id="player-list-label">Current players</h2>
+            </div>
+            <ul id="playerList"></ul>
+        </div>
+    </div>
+
+
+
+    <script src="/static/join.js"></script>
+</body>
+
+</html>

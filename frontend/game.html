@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese Word Bomb</title>
+    <link rel="stylesheet" href="/static/game.css">
+</head>
+
+<body>
+    <div class="game-container">
+        <aside class="sidebar">
+            <h1 id="player-list">Players</h1>
+            <ul id="players"></ul>
+        </aside>
+
+        <div class="text">
+            <h1 style="font-size: 2.5rem;"><span id="current-player"></span></h1>
+            <h3 class="pattern"><span id="pattern"></span></h3>
+            <h2 id="time">Time Left: <span id="timer">0.0</span>s</h2>
+
+            <div>
+                <input class="word" type="text" id="word" placeholder="Enter word" />
+                <button onclick="submitWord()" id="submit">Submit</button>
+                <div id="error" style="color:red"> </div>
+            </div>
+
+            <div id="game-over" style="display:none">
+                <h1 id="winner-text"></h1>
+                <button onclick="restartGame()" id="restart">Restart Game</button>
+                <button onclick="returnToLobby()" id="return">Return to Lobby</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/game.js"></script>
+</body>
+
+</html>
