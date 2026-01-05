@@ -6,7 +6,8 @@ if (!lobbyCode) {
     window.location.href = "/";
 }
 
-const ws = new WebSocket(`ws://localhost:8000/ws/${lobbyCode}`);
+const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+const ws = new WebSocket(`${protocol}://${window.location.host}/ws/${lobbyCode}`);
 
 // Retrieve stored player identity
 const playerName = localStorage.getItem("playerName");

@@ -4,7 +4,8 @@ if (!lobbyCode) {
     alert("No lobby code provided");
 }
 
-const ws = new WebSocket(`ws://localhost:8000/ws/${lobbyCode}`);
+const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+const ws = new WebSocket(`${protocol}://${window.location.host}/ws/${lobbyCode}`);
 let myName = null;
 
 // LANG SWITCHER

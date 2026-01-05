@@ -1,6 +1,8 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.requests import Request
 from contextlib import asynccontextmanager
 
 import os
@@ -267,31 +269,34 @@ def check_lobby(code: str):
         return {"valid": True}
     return {"valid": False}
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
 # use join.html for join webpages
 @app.get("/join.html")
-def join_page():
-    return FileResponse("frontend/join.html")
+def join(request: Request):
+    return templates.TemplateResponse("join.html", {"request": request})
 
 # use game.html for join webpages
 @app.get("/game.html")
-def join_page():
-    return FileResponse("frontend/game.html")
+def game(request: Request):
+    return templates.TemplateResponse("game.html", {"request": request})
 
 # default to lobby page
 @app.get("/")
-def get_lobby():
-    return FileResponse(os.path.join("templates", "lobbyMenu.html"))
+def lobby(request: Request):
+    return templates.TemplateResponse("lobby.html", {"request": request})
 
-app.mount("/static", StaticFiles(directory="templates", html=True), name="static")
+
 """
 uvicorn main:app --reload
 
 bugs:
 return to lobby/restart bugs when theres multiple players
 * host leaves on winner screen freezes game
+* x out of page means leaving the game/join screen
 
 additions:
-x out of page means leaving the game. tabbing out does nothing <- alr implemented
 returning to lobby keeps same players in the game
 max players per lobby
 all players can see all players guesses/typings
