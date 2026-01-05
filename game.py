@@ -302,7 +302,6 @@ class Game:
         """
         Starts Japanese word bomb game. Starts on a random player.
         """
-        self.players.append(Player("IM a TEST", "Furina"))
         self.game_active = True
         self.turn_index = random.randint(0, len(self.players) - 1)
         self.current_pattern = self.generate_pattern()
