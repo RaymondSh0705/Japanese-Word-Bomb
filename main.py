@@ -280,9 +280,9 @@ def join_page():
 # default to lobby page
 @app.get("/")
 def get_lobby():
-    return FileResponse(os.path.join("frontend", "lobbyMenu.html"))
+    return FileResponse(os.path.join("templates", "lobbyMenu.html"))
 
-app.mount("/static", StaticFiles(directory="frontend", html=True), name="static")
+app.mount("/static", StaticFiles(directory="templates", html=True), name="static")
 """
 uvicorn main:app --reload
 
