@@ -285,7 +285,7 @@ def game(request: Request):
 # default to lobby page
 @app.get("/")
 def lobby(request: Request):
-    return templates.TemplateResponse("lobby.html", {"request": request})
+    return templates.TemplateResponse("lobbyMenu.html", {"request": request})
 
 
 """
