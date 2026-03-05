@@ -147,7 +147,17 @@ setInterval(() => {
     }
 }, 100);
 
-// Submit a word
+// SUBMIT WORD (with button or with enter key)
+document.getElementById("word").focus(); // focuses word textbox
+
+const input = document.getElementById("word");
+input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        submitWord();
+    }
+});
+
 function submitWord() {
     const input = document.getElementById("word");
     const word = input.value.trim();
@@ -155,6 +165,7 @@ function submitWord() {
 
     ws.send(JSON.stringify({ type: "submit", word }));
     input.value = "";
+    input.focus();
 }
 
 // RESTART GAME

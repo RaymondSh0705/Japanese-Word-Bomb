@@ -47,6 +47,7 @@ window.onclick = (e) => {
     if (e.target == settingsModal) settingsModal.style.visibility = "hidden";
 };
 let state = null;
+
 // SAVE SETTINGS
 saveSettingsBtn.onclick = () => {
     let host = localStorage.getItem("device_id");
