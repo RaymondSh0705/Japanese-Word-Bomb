@@ -63,7 +63,7 @@ class Game:
                 self.patterns = pickle.load(f)
 
         self.turn_index = 0
-        self.time_limit = 3
+        self.time_limit = 5
         self.turn_start_time = None
         self.starting_lives = 3
         self.wrong_turns_before_change = 2
@@ -242,6 +242,7 @@ class Game:
         """
         if len(self.players) == 1:
             if self.players[0].is_eliminated:
+                self.winner = self.players[0]
                 return self.players[0]
             else:
                 return None
@@ -311,7 +312,10 @@ class Game:
         """
         Resets game to unplayed state with no active players
         """
-        self.players.clear()
+        # self.players.clear()
+        for p in self.players:
+            p.lives = self.starting_lives
+            p.is_eliminated = False
         self.game_active = False
         self.turn_index = 0
         self.last_error = ""

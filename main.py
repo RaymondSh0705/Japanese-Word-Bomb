@@ -39,11 +39,11 @@ async def handle_message(ws, data, lobby):
     game = lobby["game"]
     touch_lobby(lobby)
     # DEBUG OUTPUT
-    if data["type"] != "join" and connections.get(ws) is None:
-        print("⚠️ MESSAGE FROM UNBOUND SOCKET:", data)
-    print("MSG FROM:", ws, data)
-    print("PLAYER:", connections.get(ws))
-    print("CURRENT:", game.get_player() if len(game.players) > 0 else None)
+    # if data["type"] != "join" and connections.get(ws) is None:
+    #     print("⚠️ MESSAGE FROM UNBOUND SOCKET:", data)
+    # print("MSG FROM:", ws, data)
+    # print("PLAYER:", connections.get(ws))
+    # print("CURRENT:", game.get_player() if len(game.players) > 0 else None)
 
     # JOIN GAME
     if data["type"] == "join":
@@ -108,13 +108,13 @@ async def handle_message(ws, data, lobby):
         if winner is not None:
             await broadcast_state(lobby)
             return 
-        
-        game.next_turn()
+        else:
+            game.next_turn()
         await broadcast_state(lobby)
     
     # LOBBY RETURN
     elif data["type"] == "return_to_lobby":
-        device_map.clear()
+        # device_map.clear()
         game.reset_to_lobby()
         await broadcast_to_lobby(lobby, {"type": "force_return_to_lobby"})
 
@@ -297,7 +297,6 @@ return to lobby/restart bugs when theres multiple players
 * x out of page means leaving the game/join screen
 
 additions:
-returning to lobby keeps same players in the game
 max players per lobby
 all players can see all players guesses/typings
 """

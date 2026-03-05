@@ -5,7 +5,10 @@ if (!lobbyCode) {
 }
 
 const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+
+
 const ws = new WebSocket(`${protocol}://${window.location.host}/ws/${lobbyCode}`);
+
 let myName = null;
 
 // LANG SWITCHER
@@ -135,6 +138,17 @@ ws.onmessage = (event) => {
 };
 
 ws.onopen = () => {
+    // RECONNECTS PLAYER AFTER STARTING IF PLAYER EXISTS
+    console.log(localStorage.getItem("device_id"));
+    if (localStorage.getItem("device_id")) {
+        myName = localStorage.getItem("playerName")
+        ws.send(JSON.stringify({
+            type: "reconnect",
+            name: localStorage.getItem("playerName"),
+            device_id: localStorage.getItem("device_id")
+        }));
+    }
+
     ws.send(JSON.stringify({ type: "request_state" }));
     console.log("Connected to lobby");
 };

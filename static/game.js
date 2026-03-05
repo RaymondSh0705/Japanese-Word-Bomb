@@ -37,6 +37,7 @@ window.onload = () => {
 
 // RECONNECTS PALYER AFTER STARTING
 ws.onopen = () => {
+    console.log(localStorage.getItem("device_id"));
     if (playerName) {
         ws.send(JSON.stringify({
             type: "reconnect",
@@ -170,9 +171,10 @@ function restartGame() {
 function returnToLobby() {
     if (host_id === localDeviceId) {
         let settings = localStorage.getItem("gameSettings");
-        localStorage.clear()
+        // localStorage.clear()
         localStorage.setItem("lang", lang)
         localStorage.setItem("gameSettings", settings);
+        localStorage.setItem("device_id", localDeviceId);
         ws.send(JSON.stringify({ type: "return_to_lobby" }));
     }
 }
