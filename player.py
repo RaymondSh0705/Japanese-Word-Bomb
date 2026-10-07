@@ -7,10 +7,8 @@ class Player:
         self.word = None
 
     def lose_life(self):
-        if self.lives <= 0:
-            self.is_eliminated = True
-        else:
-            self.lives -= 1
+        self.lives = max(0, self.lives - 1)
+        self.is_eliminated = self.lives == 0
 
     def __repr__(self):
         return str(self.id)

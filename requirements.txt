@@ -1,4 +1,5 @@
-fastapi
-uvicorn[standard]
-jinja2
-websockets
+fastapi==0.124.4
+starlette==0.50.0
+uvicorn[standard]==0.38.0
+jinja2==3.1.6
+websockets==15.0.1

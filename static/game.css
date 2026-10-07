@@ -42,3 +42,27 @@ input {
     padding: 10px;
     font-size: 1rem;
 }
+
+.player-activity {
+    width: 100%;
+    max-width: 32rem;
+    margin-bottom: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.player-activity p {
+    margin: 0.5rem 0;
+}
+
+#current-typing {
+    font-size: 1.4rem;
+    min-height: 1.7em;
+}
+
+#current-typing[data-result="correct"] {
+    color: #15803d;
+}
+
+#current-typing[data-result="incorrect"] {
+    color: #dc2626;
+}

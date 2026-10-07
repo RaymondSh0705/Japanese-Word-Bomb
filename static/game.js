@@ -28,6 +28,14 @@ if (lang == "jp") {
     document.getElementById("return").innerText = "ロビーに戻る";
 }
 
+function updateActivity(state) {
+    const typingEl = document.getElementById("current-typing");
+    typingEl.textContent = state.current_typing || "";
+    typingEl.dataset.result = state.typing_result
+        ? (state.typing_result === "OK" ? "correct" : "incorrect")
+        : "";
+}
+
 // STARTS GAME
 window.onload = () => {
     window.gameEnded = false;
@@ -50,6 +58,14 @@ ws.onopen = () => {
 
 ws.onmessage = (event) => {
     const state = JSON.parse(event.data);
+    if (state.type === "typing" || state.type === "guess") {
+        if (currentState && state.turn_id === currentState.turn_id) {
+            currentState.current_typing = state.word;
+            currentState.typing_result = state.type === "guess" ? state.result : null;
+            updateActivity(currentState);
+        }
+        return;
+    }
     host_id = state.host_id;
 
     if (state.type == "force_return_to_lobby") {
@@ -59,7 +75,9 @@ ws.onmessage = (event) => {
     }
 
     // Store latest state
+    const newTurn = currentState && state.turn_id !== currentState.turn_id;
     currentState = state;
+    if (newTurn) document.getElementById("word").value = "";
     lastUpdate = Date.now();
 
     // Update UI immediately
@@ -81,9 +99,15 @@ ws.onmessage = (event) => {
         window.gameEnded = true;
         return;
     }
+    window.gameEnded = false;
+    document.getElementById("game-over").style.display = "none";
 };
 
 function updateUI(state) {
+    updateActivity(state);
+    const myTurn = state.started && !state.winner && state.current_player_device === localDeviceId;
+    document.getElementById("word").disabled = !myTurn;
+    document.getElementById("submit").disabled = !myTurn;
     // CURRENT PLAYER
     const currentPlayerEl = document.getElementById("current-player");
     if (currentPlayerEl) {
@@ -92,8 +116,6 @@ function updateUI(state) {
         } else {
             currentPlayerEl.innerText = "Current Player: " + state.current_player_name;
         }
-    } else {
-        currentPlayerEl.innerText = "Current Player: ";
     }
 
     // DISPLAY PATTERN
@@ -141,7 +163,9 @@ setInterval(() => {
     if (timerEl) timerEl.innerText = remaining.toFixed(1);
 
     // Auto-submit timeout when time runs out
-    if (remaining <= 0 && !currentState.time_expired) {
+    if (remaining <= 0 && !currentState.time_expired
+            && currentState.current_player_device === localDeviceId
+            && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: "timeout" }));
         currentState.time_expired = true;
     }
@@ -151,8 +175,13 @@ setInterval(() => {
 document.getElementById("word").focus(); // focuses word textbox
 
 const input = document.getElementById("word");
+input.addEventListener("input", () => {
+    if (ws.readyState !== WebSocket.OPEN || !currentState || currentState.winner
+            || currentState.current_player_device !== localDeviceId) return;
+    ws.send(JSON.stringify({ type: "typing", word: input.value, turn_id: currentState.turn_id }));
+});
 input.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.isComposing && e.keyCode !== 229) {
         e.preventDefault();
         submitWord();
     }
@@ -161,7 +190,7 @@ input.addEventListener("keydown", function (e) {
 function submitWord() {
     const input = document.getElementById("word");
     const word = input.value.trim();
-    if (!word) return;
+    if (!word || input.disabled || ws.readyState !== WebSocket.OPEN) return;
 
     ws.send(JSON.stringify({ type: "submit", word }));
     input.value = "";

@@ -1,7 +1,19 @@
 import pickle
 import time
 import random
+from pathlib import Path
+from functools import lru_cache
 from player import Player
+
+BASE_DIR = Path(__file__).resolve().parent
+
+
+@lru_cache(maxsize=4)
+def load_data(filename):
+    # Dictionary and patterns are read-only and can be shared by all lobbies.
+    with (BASE_DIR / filename).open("rb") as f:
+        return pickle.load(f)
+
 
 class Game:
     """
@@ -52,15 +64,8 @@ class Game:
             raise ValueError("Value must be between 1, 4 inclusive")
         
         self.players = players
-        with open("jp_dict.pkl", "rb") as f:
-            self.dictionary = pickle.load(f)
-
-        if difficulty != 4:
-            with open(f"patterns{difficulty}.pkl", "rb") as f:
-                self.patterns = pickle.load(f)
-        else:
-            with open(f"patterns1.pkl", "rb") as f:
-                self.patterns = pickle.load(f)
+        self.dictionary = load_data("jp_dict.pkl")
+        self.patterns = load_data(f"patterns{difficulty if difficulty != 4 else 1}.pkl")
 
         self.turn_index = 0
         self.time_limit = 5
@@ -76,10 +81,12 @@ class Game:
         self.last_error = ""
         self.winner = None
         self.queue = []
+        self.current_typing = ""
+        self.typing_result = None
 
 
     def get_player(self) -> Player:
-        return self.players[self.turn_index]
+        return self.players[self.turn_index] if self.players else None
 
     def time_elapsed(self) -> float:
         if not self.turn_start_time:
@@ -87,7 +94,7 @@ class Game:
         return max(0, self.time_limit - (time.time() - self.turn_start_time))
 
     def is_turn_expired(self) -> bool:
-        return self.time_elapsed() > self.time_limit
+        return self.time_elapsed() <= 0
 
     # ---------------- CONSOLE GAME (testing) ---------------- #
     def console_start_game(self):
@@ -118,7 +125,7 @@ class Game:
             self.wrong_guesses = 0
         while True:
             self.turn_index = (self.turn_index + 1) % len(self.players)
-            if not self.players[self.turn_index].is_eliminated:
+            if self.players[self.turn_index].lives > 0:
                 break
         self.console_the_turn()
 
@@ -151,10 +158,10 @@ class Game:
 
     # ---------------- WORD VALIDATION (used for submit_word()) ---------------- #
     def check_word_exists(self, word: str) -> bool:
-        return word in self.dictionary[word[:1]]
+        return word in self.dictionary.get(word[:1], ())
 
     def check_pattern_match(self, word: str) -> bool:
-        return word.__contains__(self.current_pattern)
+        return bool(self.current_pattern) and self.current_pattern in word
 
     def normalize_kana(self, s) -> bool:
         result = []
@@ -241,7 +248,7 @@ class Game:
         :return: winner
         """
         if len(self.players) == 1:
-            if self.players[0].is_eliminated:
+            if self.players[0].lives <= 0:
                 self.winner = self.players[0]
                 return self.players[0]
             else:
@@ -261,9 +268,22 @@ class Game:
         return player
     
     def remove_player(self, player_id: str) -> Player:
-        for p in self.players:
-            if p.id == player_id:
-                self.players.remove(p)
+        for roster in (self.players, self.queue):
+            for p in roster:
+                if p.id != player_id:
+                    continue
+                index = roster.index(p)
+                roster.remove(p)
+                if roster is self.players:
+                    if not self.players:
+                        self.reset_to_lobby()
+                    elif self.game_active:
+                        if index < self.turn_index:
+                            self.turn_index -= 1
+                        elif index == self.turn_index:
+                            self.turn_index = (index - 1) % len(self.players)
+                            self.next_turn()
+                        self.check_winner()
                 return p
     
     def get_player_by_name(self, player_id: str) -> Player:
@@ -293,6 +313,9 @@ class Game:
             for p in self.players
             ],
             "last_error": self.last_error,
+            "current_typing": self.current_typing,
+            "typing_result": self.typing_result,
+            "turn_id": self.turn_start_time,
             "winner": self.winner.id if self.winner else None,
             "host_id": self.players[0].device_id if len(self.players) > 0 else None
         }
@@ -303,6 +326,8 @@ class Game:
         """
         Starts Japanese word bomb game. Starts on a random player.
         """
+        if not self.players:
+            return
         self.game_active = True
         self.turn_index = random.randint(0, len(self.players) - 1)
         self.current_pattern = self.generate_pattern()
@@ -319,6 +344,8 @@ class Game:
         self.game_active = False
         self.turn_index = 0
         self.last_error = ""
+        self.current_typing = ""
+        self.typing_result = None
         self.used_words = set()
         self.winner = None
         self.current_pattern = None
@@ -328,6 +355,8 @@ class Game:
     
     def restart_game(self):
         self.players = self.players + self.queue
+        if not self.players:
+            return
         for p in self.players:
             p.lives = self.starting_lives
             p.is_eliminated = False
@@ -335,6 +364,8 @@ class Game:
         self.winner = None
         self.game_active = True
         self.last_error = ""
+        self.current_typing = ""
+        self.typing_result = None
         self.used_words = set()
         self.turn_start_time = None
         self.wrong_guesses = -1
@@ -348,9 +379,14 @@ class Game:
         necessary.
         """
         self.last_error = ""
+        self.current_typing = ""
+        self.typing_result = None
+        if not any(p.lives > 0 for p in self.players):
+            self.game_active = False
+            return
         while True:
             self.turn_index = (self.turn_index + 1) % len(self.players)
-            if not self.players[self.turn_index].is_eliminated:
+            if self.players[self.turn_index].lives > 0:
                 break
         self.wrong_guesses += 1
         if self.wrong_guesses > self.wrong_turns_before_change:
@@ -364,18 +400,15 @@ class Game:
         
         :param settings: keys: lives, time, diff
         """
-        self.starting_lives = settings.get("lives")
-        self.time_limit = settings.get("time")
-        self.wrong_turns_before_change = settings.get("turns")
-        difficulty = settings.get("diff")
-        if difficulty == "medium":
-            with open(f"patterns2.pkl", "rb") as f:
-                self.patterns = pickle.load(f)
-        elif difficulty == "hard":
-            with open(f"patterns3.pkl", "rb") as f:
-                self.patterns = pickle.load(f)
-        else:
-            with open(f"patterns1.pkl", "rb") as f:
-                self.patterns = pickle.load(f)
+        def bounded(key, current, lower, upper):
+            value = settings.get(key)
+            if type(value) is not int:
+                return current
+            return max(lower, min(upper, value))
 
-    
+        self.starting_lives = bounded("lives", self.starting_lives, 1, 20)
+        self.time_limit = bounded("time", self.time_limit, 1, 60)
+        self.wrong_turns_before_change = bounded("turns", self.wrong_turns_before_change, 0, 100)
+        difficulty = settings.get("diff")
+        number = 2 if difficulty == "medium" else 3 if difficulty == "hard" else 1
+        self.patterns = load_data(f"patterns{number}.pkl")

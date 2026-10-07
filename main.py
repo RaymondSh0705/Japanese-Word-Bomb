@@ -1,11 +1,10 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from contextlib import asynccontextmanager
 
-import os
+from pathlib import Path
 import random
 import string
 import time
@@ -14,6 +13,7 @@ import asyncio
 from game import Game
 from player import Player
 
+BASE_DIR = Path(__file__).resolve().parent
 # LOBBY LIFESPAN
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,6 +37,8 @@ async def handle_message(ws, data, lobby):
     connections = lobby["connections"]
     clients = lobby["clients"]
     game = lobby["game"]
+    if not isinstance(data, dict) or not isinstance(data.get("type"), str):
+        return
     touch_lobby(lobby)
     # DEBUG OUTPUT
     # if data["type"] != "join" and connections.get(ws) is None:
@@ -48,6 +50,9 @@ async def handle_message(ws, data, lobby):
     # JOIN GAME
     if data["type"] == "join":
         device_id = data.get("device_id")
+        if (not isinstance(device_id, str) or not device_id
+                or not isinstance(data.get("name"), str) or not data["name"].strip()):
+            return
 
         if device_id in device_map:
             player = device_map[device_id]
@@ -75,17 +80,39 @@ async def handle_message(ws, data, lobby):
     elif data["type"] == "submit":
         player = connections.get(ws)
 
-        if not player:
+        if not game.game_active or game.winner or not player or player != game.get_player():
             return
-        if player != game.get_player():
+        word = data.get("word")
+        if not isinstance(word, str) or not word.strip() or len(word) > 200:
             return
-        
-        result = game.submit_word(data["word"])
+        result = game.submit_word(word.strip())
+        game.current_typing = word.strip()
+        game.typing_result = result
+        guess_event = {
+            "type": "guess", "word": game.current_typing,
+            "result": result, "turn_id": game.turn_start_time,
+        }
 
         if result == "OK":
             game.next_turn()
 
+        await broadcast_to_lobby(lobby, guess_event)
         await broadcast_state(lobby)
+
+    # Typing updates use a separate event so they do not reset clients' timers.
+    elif data["type"] == "typing":
+        player = connections.get(ws)
+        word = data.get("word")
+        if (not game.game_active or game.winner or not player
+                or player != game.get_player() or not isinstance(word, str)
+                or data.get("turn_id") != game.turn_start_time):
+            return
+        game.current_typing = word[:200]
+        game.typing_result = None
+        await broadcast_to_lobby(lobby, {
+            "type": "typing", "word": game.current_typing,
+            "turn_id": game.turn_start_time,
+        })
 
     # RECONNECT
     elif data["type"] == "reconnect":
@@ -97,11 +124,17 @@ async def handle_message(ws, data, lobby):
     
     # TIMEOUT
     elif data["type"] == "timeout":
-        if not game.game_active:
+        if not game.game_active or game.winner:
             return
         player = connections.get(ws)
-        if not player:
+        if not player or player != game.get_player():
             return
+        if not game.is_turn_expired():
+            # Browser clocks can reach zero slightly before the server's clock.
+            await ws.send_json(game.serialize())
+            return
+        game.current_typing = ""
+        game.typing_result = None
         game.get_player().lose_life()
 
         winner = game.check_winner()
@@ -125,12 +158,11 @@ async def handle_message(ws, data, lobby):
     
     # GO TO MAIN MENU
     elif data["type"] == "leave_lobby":
-        player = device_map.get(data["device_id"])
+        player = connections.get(ws)
         if player:
             lobby["game"].remove_player(player.id)
-            connections.pop(ws)
-            device_map.pop(data["device_id"])
-            clients.remove(ws)
+            handle_disconnect(ws, lobby)
+            device_map.pop(player.device_id, None)
         if len(lobby["game"].players) <= 0:
             lobbies.pop(lobby["code"], None)
             print("lobby deleted")
@@ -138,7 +170,10 @@ async def handle_message(ws, data, lobby):
     
     # SETTINGS
     elif data["type"] == "settings":
-        game.change_settings(data["settings"])
+        settings = data.get("settings")
+        if not isinstance(settings, dict):
+            return
+        game.change_settings(settings)
         await broadcast_state(lobby)
     
     # REQUEST STATE
@@ -163,7 +198,7 @@ async def websocket_endpoint(ws: WebSocket, lobby_code: str):
             data = await ws.receive_json()
             await handle_message(ws, data, lobby)
 
-    except (WebSocketDisconnect, RuntimeError):
+    except (WebSocketDisconnect, RuntimeError, OSError):
         # Socket closed or invalid state
         pass
 
@@ -185,10 +220,10 @@ async def broadcast_state(lobby):
     state = lobby["game"].serialize()
     disconnected = []
 
-    for client in lobby["clients"]:
+    for client in list(lobby["clients"]):
         try:
             await client.send_json(state)
-        except (WebSocketDisconnect, RuntimeError):
+        except (WebSocketDisconnect, RuntimeError, OSError):
             disconnected.append(client)
 
     # Remove dead clients from list
@@ -198,10 +233,10 @@ async def broadcast_state(lobby):
 # RETURN TO LOBBY SCREEN
 async def broadcast_to_lobby(lobby, message):
     disconnected = []
-    for client in lobby["clients"]:
+    for client in list(lobby["clients"]):
         try:
             await client.send_json(message)
-        except (WebSocketDisconnect, RuntimeError):
+        except (WebSocketDisconnect, RuntimeError, OSError):
             disconnected.append(client)
 
     # Remove dead clients from list
@@ -239,7 +274,7 @@ async def cleanup_lobbies():
 
 # CREATE LOBBIES
 @app.post("/create_lobby")
-def create_lobby():
+async def create_lobby():
     while True:
         code = generate_lobby_code()
         if code not in lobbies:
@@ -269,23 +304,23 @@ def check_lobby(code: str):
         return {"valid": True}
     return {"valid": False}
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 # use join.html for join webpages
 @app.get("/join.html")
 def join(request: Request):
-    return templates.TemplateResponse("join.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="join.html")
 
 # use game.html for join webpages
 @app.get("/game.html")
 def game(request: Request):
-    return templates.TemplateResponse("game.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="game.html")
 
 # default to lobby page
 @app.get("/")
 def lobby(request: Request):
-    return templates.TemplateResponse("lobbyMenu.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="lobbyMenu.html")
 
 
 """

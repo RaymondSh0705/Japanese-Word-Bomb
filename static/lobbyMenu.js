@@ -71,23 +71,21 @@ langSelect.onchange = () => {
     document.getElementById("wrong-code").innerText = texts[lang].invalidCode;
 };
 
-// CREATE A LOBBY
-document.getElementById("create-lobby").addEventListener("click", async () => {
-    console.log("Create Lobby clicked");
-    createLobby()
-});
-
-// ---- Join lobby ----
-document.getElementById("join-lobby").addEventListener("click", () => {
-    joinLobby();
-});
-
 // MAKE NEW LOBBY
 async function createLobby() {
-    const res = await fetch("/create_lobby", { method: "POST" });
-    const data = await res.json();
-    // Redirect to lobby page
-    window.location.href = `/join.html?code=${data.code}`;
+    const button = document.getElementById("create-lobby");
+    if (button.disabled) return;
+    button.disabled = true;
+    try {
+        const res = await fetch("/create_lobby", { method: "POST" });
+        if (!res.ok) throw new Error(`Create lobby failed: HTTP ${res.status}`);
+        const data = await res.json();
+        window.location.href = `/join.html?code=${data.code}`;
+    } catch (error) {
+        console.error(error);
+        alert(lang === "jp" ? "ロビーを作成できませんでした。もう一度お試しください。" : "Could not create a lobby. Please try again.");
+        button.disabled = false;
+    }
 }
 
 // JOIN EXISTING LOBBY
