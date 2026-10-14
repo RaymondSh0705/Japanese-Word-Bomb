@@ -1,74 +1,19 @@
-.header {
-    text-align: center;
-}
-
-.screen {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    max-width: 800px;
-    margin: 0 auto;
-    justify-items: center;
-    align-items: start;
-    gap: 40px;
-    padding: 20px;
-}
-
-.screen button {
-    padding: 10px 16px;
-    font-size: 1rem;
-    cursor: pointer;
-}
-
-.join {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-}
-
-.join-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.join-row input {
-    padding: 10px;
-    font-size: 1rem;
-}
-
-.join-row button {
-    padding: 10px;
-}
-
-.player-list {
-    text-align: center;
-}
-
-.player-list ul {
-    padding: 0;
-    font-size: 1.25rem;
-    list-style: none;
-}
-
-.player-list li {
-    margin: 6px 0;
-}
-
-.settings-anchor {
-    position: relative;
-    justify-self: center;
-}
-
-.settings-modal {
-    display: block;
-    position: absolute;
-    left: 50vw;
-    transform: translateX(-50%);
-    padding: 20px;
-    width: 320px;
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-    z-index: 1000;
-    background: rgba(199, 199, 199, 0.75);
-}
+.lobby-heading { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:32px; }
+.lobby-heading h1 { font-size:clamp(1.8rem,4vw,2.8rem); max-width:650px; margin-bottom:14px; }
+.lobby-heading #header { color:var(--cyan); font-size:1.1rem; letter-spacing:0; margin:0; }
+.room-code { border:1px solid #345991; background:#19325d55; border-radius:18px; padding:20px; text-align:center; min-width:200px; }
+.room-code h2 { font-size:1.1rem; letter-spacing:.1em; color:var(--cyan); margin-bottom:12px; }
+.screen { display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start; }
+.join h2 { font-size:1.8rem; margin:0 0 24px; }
+.join-row { display:flex; gap:10px; }
+.lobby-controls { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:26px; }
+#leave { margin-top:20px; }
+.list-heading { display:flex; justify-content:space-between; align-items:center; }
+.list-heading h2 { font-size:1.8rem; margin:0; }
+#playerList { list-style:none; padding:0; margin:24px 0; }
+#playerList li { display:flex; align-items:center; gap:12px; padding:14px 16px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; background:#17253d; overflow-wrap:anywhere; }
+.host-crown { color:var(--cyan); font-size:2rem; line-height:1; flex-shrink:0; }
+.lobby-player-name { min-width:0; }
+.lobby-tip { font-size:1.1rem; color:var(--cyan); margin:20px 0 0; }
+#settings-form > button { margin-top:24px; }
+@media(max-width:700px) { .lobby-heading { flex-direction:column; align-items:stretch; } .room-code { display:flex; justify-content:space-between; align-items:center; gap:10px; } .room-code h2 { margin:0; } .screen { grid-template-columns:1fr; } }

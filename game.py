@@ -64,6 +64,7 @@ class Game:
             raise ValueError("Value must be between 1, 4 inclusive")
         
         self.players = players
+        self.difficulty = "medium" if difficulty == 2 else "hard" if difficulty == 3 else "easy"
         self.dictionary = load_data("jp_dict.pkl")
         self.patterns = load_data(f"patterns{difficulty if difficulty != 4 else 1}.pkl")
 
@@ -316,6 +317,11 @@ class Game:
             "current_typing": self.current_typing,
             "typing_result": self.typing_result,
             "turn_id": self.turn_start_time,
+            "settings": {
+                "lives": self.starting_lives, "time": self.time_limit,
+                "turns": self.wrong_turns_before_change,
+                "diff": self.difficulty,
+            },
             "winner": self.winner.id if self.winner else None,
             "host_id": self.players[0].device_id if len(self.players) > 0 else None
         }
@@ -411,4 +417,5 @@ class Game:
         self.wrong_turns_before_change = bounded("turns", self.wrong_turns_before_change, 0, 100)
         difficulty = settings.get("diff")
         number = 2 if difficulty == "medium" else 3 if difficulty == "hard" else 1
+        self.difficulty = "medium" if number == 2 else "hard" if number == 3 else "easy"
         self.patterns = load_data(f"patterns{number}.pkl")

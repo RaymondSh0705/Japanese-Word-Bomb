@@ -1,43 +1,11 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Japanese Word Bomb</title>
-    <link rel="stylesheet" href="/static/game.css">
-</head>
-
-<body>
-    <div class="game-container">
-        <aside class="sidebar">
-            <h1 id="player-list">Players</h1>
-            <ul id="players"></ul>
-        </aside>
-
-        <div class="text">
-            <h1 style="font-size: 2.5rem;"><span id="current-player"></span></h1>
-            <div id="player-activity" class="player-activity">
-                <p id="current-typing"></p>
-            </div>
-            <h3 class="pattern"><span id="pattern"></span></h3>
-            <h2 id="time">Time Left: <span id="timer">0.0</span>s</h2>
-
-            <div>
-                <input class="word" type="text" id="word" placeholder="Enter word" maxlength="200" autofocus />
-                <button onclick="submitWord()" id="submit">Submit</button>
-                <div id="error" style="color:red"> </div>
-            </div>
-
-            <div id="game-over" style="display:none">
-                <h1 id="winner-text"></h1>
-                <button onclick="restartGame()" id="restart">Restart Game</button>
-                <button onclick="returnToLobby()" id="return">Return to Lobby</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="/static/game.js"></script>
-</body>
-
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Play · Japanese Word Bomb</title><link rel="stylesheet" href="/static/ui.css"><link rel="stylesheet" href="/static/game.css"></head>
+<body><main class="app-shell game-shell">
+<nav class="topbar"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">あ</span> WORD BOMB <span class="badge">日本語</span></a><span id="game-code" class="badge"></span></nav>
+<div class="game-container"><section class="panel arena" id="arena"><div class="arena-top"><span id="turn-status" class="badge"></span></div>
+<h1 id="current-player"></h1><div id="player-activity" class="player-activity"><p id="current-typing"></p></div>
+<div class="pattern-stage"><p class="pattern-hint" data-en="Include these kana" data-jp="このかなを含む言葉">Include these kana</p><h2 class="pattern"><span id="pattern"></span></h2><span class="pattern-decoration" aria-hidden="true">あ</span></div>
+<div class="timer-row"><span id="time-label" class="muted" data-en="Time left" data-jp="残り時間">Time left</span><strong id="time"><span id="timer">0.0</span><small>s</small></strong></div><div class="timer-track"><div id="timer-bar"></div></div>
+<label class="sr-only" for="word" data-en="Your word" data-jp="回答する言葉">Your word</label><div class="word-row"><input type="text" id="word" placeholder="Enter kana…" maxlength="200" autocomplete="off" autofocus disabled><button onclick="submitWord()" id="submit" class="primary" disabled>Submit</button></div><div id="error" class="error" role="status"></div>
+<div id="game-over" class="game-over" style="display:none" role="status"><h2 id="winner-text"></h2><div class="actions"><button onclick="restartGame()" id="restart" class="primary">Play again</button><button onclick="returnToLobby()" id="return">Lobby</button></div><p id="winner-hint" class="help"></p></div>
+</section><aside class="panel sidebar"><div class="list-heading"><h2 id="player-list">Players</h2><span id="player-count" class="badge">0</span></div><ul id="players"></ul></aside></div>
+</main><script src="/static/ui.js"></script><script src="/static/game.js"></script></body></html>

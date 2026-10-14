@@ -1,80 +1,9 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>Word Bomb JP</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/join.css">
-</head>
-
-<body>
-    <div class="header">
-        <h1 id="header">Japanese Word Bomb Lobby</h1>
-        <h2 id="lobby-code">FURINA</h2>
-        <hr>
-    </div>
-    <div class="screen">
-        <div class="join">
-            <h2 id="join-game">Join game</h2>
-            <div class="join-row">
-                <input id="nameInput" placeholder="Name">
-                <button onclick="joinGame()" id="join">Join</button>
-            </div>
-            <button onclick="startGame()" id="start">Start</button>
-            <button onclick="leaveLobby()" id="leave">Return to Main Menu</button>
-
-            <div class="settings-anchor">
-                <button id="settings-btn">Settings ⚙️</button>
-                <div id="settings-modal" class="settings-modal" style="visibility: hidden;">
-                    <div class="modal-content">
-                        <span class="close-settings">&times;</span>
-                        <h2 id="settings-header">Game Settings</h2>
-                        <label>
-                            <span id="lives-label">Lives per player:</span>
-                            <input type="number" id="setting-lives" min="1" max="20" value="3">
-                        </label>
-                        <br>
-
-                        <label>
-                            <span id="diff-label">Difficulty:</span>
-                            <select id="setting-difficulty">
-                                <option value="easy" selected>Easy</option>
-                                <option value="medium">Medium</option>
-                                <option value="hard">Hard</option>
-                            </select>
-                        </label>
-                        <br>
-
-                        <label>
-                            <span id="time-label">Turn Time (seconds):</span>
-                            <input type="number" id="setting-time" min="1" max="60" value="10">
-                        </label>
-                        <br>
-
-                        <label>
-                            <span id="prompt-label">Prompt Turns:</span>
-                            <input type="number" id="setting-turns" min="0" max="100" value="2">
-                        </label>
-                        <br>
-
-                        <button id="save-settings">Save</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="player-list">
-            <div id="current-players">
-                <h2 id="player-list-label">Current players</h2>
-            </div>
-            <ul id="playerList"></ul>
-        </div>
-    </div>
-
-
-
-    <script src="/static/join.js"></script>
-</body>
-
-</html>
+<!DOCTYPE html><html lang="en"><head><title>Lobby · Japanese Word Bomb</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/static/ui.css"><link rel="stylesheet" href="/static/join.css"></head>
+<body><main class="app-shell">
+<nav class="topbar"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">あ</span> WORD BOMB <span class="badge">日本語</span></a></nav>
+<header class="lobby-heading"><div><h1 data-en="Japanese Word Bomb" data-jp="日本語ワードボム">Japanese Word Bomb</h1><h2 id="header">Lobby</h2></div><div class="room-code"><h2 id="lobby-code"></h2><button id="copy-code" class="quiet" data-en="Copy code" data-jp="コードをコピー">Copy code</button></div></header>
+<div class="screen"><section class="panel join"><h2 id="join-game">Your name</h2><form id="name-form" class="join-row"><input id="nameInput" placeholder="Name" maxlength="40" aria-label="Player name" autocomplete="nickname" required><button type="submit" id="join" class="primary">Join</button></form><p id="lobby-status" class="help" role="status"></p><div class="lobby-controls"><button onclick="startGame()" id="start" class="primary" disabled>Start</button><button id="settings-btn" disabled>Settings</button></div><p class="help" data-en="Host controls settings and start." data-jp="設定と開始はホストが操作します。">Host controls settings and start.</p><button onclick="leaveLobby()" id="leave" class="quiet full-width">Main menu</button></section>
+<section class="panel player-list"><div class="list-heading"><h2 id="player-list-label">Players</h2><span id="player-count" class="badge">0</span></div><ul id="playerList"></ul><p class="lobby-tip" data-en="TIP: Hiragana and katakana inputs both work in game!" data-jp="ヒント：ゲームではひらがな・カタカナのどちらでも入力できます！">TIP: Hiragana and katakana inputs both work in game!</p></section></div>
+</main>
+<dialog id="settings-modal" aria-labelledby="settings-header"><div class="dialog-heading"><div><h2 id="settings-header">Settings</h2></div><button class="close-settings" aria-label="Close">×</button></div><form id="settings-form"><div class="settings-grid"><label><span id="lives-label">Lives</span><input type="number" id="setting-lives" min="1" max="20" value="3" required></label><label><span id="diff-label">Difficulty</span><select id="setting-difficulty"><option value="easy" data-en="Easy" data-jp="簡単">Easy</option><option value="medium" data-en="Medium" data-jp="普通">Medium</option><option value="hard" data-en="Hard" data-jp="難しい">Hard</option></select></label><label><span id="time-label">Turn time (s)</span><input type="number" id="setting-time" min="1" max="60" value="5" required></label><label><span id="prompt-label">Prompt turns</span><input type="number" id="setting-turns" min="0" max="100" value="2" required></label></div><p class="help" data-en="Missed turns before the kana changes." data-jp="お題を変更するまでの失敗ターン数。">Missed turns before the kana changes.</p><button id="save-settings" type="submit" class="primary full-width">Save</button></form></dialog>
+<script src="/static/ui.js"></script><script src="/static/join.js"></script></body></html>

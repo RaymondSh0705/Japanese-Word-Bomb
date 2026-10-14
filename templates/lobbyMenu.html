@@ -1,63 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LobbyMeny</title>
-    <link rel="stylesheet" href="/static/lobbyMenu.css">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese Word Bomb</title>
+    <link rel="stylesheet" href="/static/ui.css"><link rel="stylesheet" href="/static/lobbyMenu.css">
 </head>
-
 <body>
-    <div class="id">
-        <h1>JAPANESE WORD BOMB</h1>
-        <h2>日本語ワードボム</h2>
-    </div>
-    <hr>
-    <h2 class="mini-header" id="welcome">Create or Join a Lobby!</h2>
-    <div class="text">
-        <div>
-            <br />
-            <button class="create-lobby" onclick="createLobby()" id="create-lobby">Create Lobby</button>
-            <br /><br />
+<main class="app-shell">
+    <nav class="topbar"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">あ</span> WORD BOMB <span class="badge">日本語</span></a></nav>
+    <section class="menu-layout">
+        <div class="hero">
+            <h1 data-en="Japanese&#10;Word Bomb" data-jp="日本語&#10;ワードボム">Japanese<br>Word Bomb</h1>
+            <p class="hero-subtitle" data-en="日本語ワードボム" data-jp="Japanese Word Bomb">日本語ワードボム</p>
+            <div class="kana-art" aria-hidden="true"><span>あ</span><span>い</span><span>う</span></div>
         </div>
-        <div class="join-container">
-            <label class="join-label">
-                <span id="code-input" style="font-size: 1.25rem;">Join Code: </span><input type="text" />
-            </label>
-            <br>
-            <button class="join-lobby" id="join-lobby" onclick="joinLobby()">Join Lobby</button>
-            <p class="wrong-code" id="wrong-code" style="visibility:hidden">Invalid lobby code!</p>
+        <div class="menu-actions">
+            <h2 id="welcome">Create or Join a Lobby</h2>
+            <section class="panel create-panel"><h3 class="section-heading" data-en="01 Start a Game" data-jp="01 ゲームを始める">01 Start a Game</h3><button class="primary full-width" onclick="createLobby()" id="create-lobby">Create Lobby</button></section>
+            <section class="panel join-panel"><h3 class="section-heading" data-en="02 Join a Lobby" data-jp="02 ロビーに参加">02 Join a Lobby</h3><label for="join-code"><span id="code-input">Room code</span></label><form id="join-form" class="code-row"><input id="join-code" type="text" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" aria-label="Lobby code" required><button class="primary" id="join-lobby" type="submit">Join</button></form><p class="error" id="wrong-code" style="visibility:hidden" role="alert">Invalid lobby code!</p></section>
+            <div class="extras"><label class="language-label"><span id="language-text">Language:</span><select id="language-switch"><option value="en">English</option><option value="jp">日本語</option></select></label><button class="quiet" id="instructions-btn">How to Play</button></div>
         </div>
-    </div>
-    <div class="extras">
-        <div id="lang-option" class="lang">
-            <label>
-                <span id="language-text" style="font-size: 1.25rem;">Language:</span>
-                <select id="language-switch" class="language-switch">
-                    <option value="en">English</option>
-                    <option value="jp">日本語</option>
-                </select>
-            </label>
-        </div>
-        <br>
-        <button id="instructions-btn">How to Play</button>
-    </div>
-    <div id="instructions-modal" class="modal" style="display:none">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="instructions-header" style="margin-bottom: -2%;">How to Play Word Bomb</h2>
-            <p id="instructions-body" style="font-size: 1.25rem;">
-                1. Wait for your turn.<br>
-                2. You will see a word pattern (e.g., "あい").<br>
-                3. Submit a word that matches the pattern before time runs out.<br>
-                4. If you fail, you lose a life.<br>
-                5. Last player standing wins!
-            </p>
-        </div>
-    </div>
-
-    <script src="/static/lobbyMenu.js"></script>
-</body>
-
-</html>
+    </section>
+</main>
+<dialog id="instructions-modal" aria-labelledby="instructions-header"><div class="dialog-heading"><div><h2 id="instructions-header">How to Play</h2></div><button class="close-btn" aria-label="Close">×</button></div><p id="instructions-body" class="muted instructions-body"></p></dialog>
+<script src="/static/ui.js"></script><script src="/static/lobbyMenu.js"></script>
+</body></html>
